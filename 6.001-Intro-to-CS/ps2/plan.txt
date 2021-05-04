@@ -1,0 +1,41 @@
+Okay, lets try and write this out in a coherent fashion, before we even get it into code.
+
+First off, before game begins we can take for granted that there is a word that we have, secret_word.
+Intialise some variables:
+guesses = 6
+warnings = 3
+letters_guesed = []
+
+print this stuff off
+Welcome to the game Hangman!
+I am thinking of a word that is 4(len of secret word) letters long
+You have 3 warnings left.
+
+dashed_line
+You have 6 guesses left
+Available Letters: abcdefghijklmnopqrstuvwxyz
+Please guess a letter: a
+
+what to do every time we get an input;
+First thing to do is to check that it is a valid guess, using the input.isalpha(), 
+	IF it is we do this:
+	
+	Otherwise:
+		Tell user that was not a valid letter.
+		Decrease their total warnings by 1
+		if the warnings is 0: 
+			then decresase guesses by 1
+      set warnings = 3
+		 and print warnings left and guessed left
+
+
+
+At the end of each turn, before any input, we should check if guesses is == 0, or if the word has been guessed
+if so then we should 
+	end game,
+		which involves:
+		1. telling the user their score, which is their guesses * number of unique characters in secret word  
+      Which can be found through 26 - get_letters available(letters guessed)
+    2. Print congratulatory message
+  if guess = 0 
+    1. print the secret word and tell them they lost
