@@ -19,7 +19,7 @@ from graph import Digraph, Node, WeightedEdge
 # do the graph's edges represent? Where are the distances
 # represented?
 #
-# Answer:
+# Answer: The graph's nodes represent the buildings, with edges between them the paths to get there, with the distances stored in the WeightedEdge 
 #
 
 
@@ -42,13 +42,31 @@ def load_map(map_filename):
     Returns:
         a Digraph representing the map
     """
-
-    # TODO
+    #Create the digraph
+    mit_campus = Digraph()
+    with open(map_filename, "r") as f:
+        for line in f:
+            #Get all values into an array
+            values = line.split()
+            #Create nodes for first and second value
+            start_node = Node(values[0])
+            end_node = Node(values[1])
+            #Check if nodes are not in Digraph, if so add them
+            if not mit_campus.has_node(start_node):
+                mit_campus.add_node(start_node)
+            if not mit_campus.has_node(end_node):
+                mit_campus.add_node(end_node)
+            #Create weighted Edge
+            edge = WeightedEdge(start_node, end_node, values[2], values[3])
+            #Add weighted edge
+            mit_campus.add_edge(edge)
+    return mit_campus
     print("Loading map from file...")
 
 # Problem 2c: Testing load_map
 # Include the lines used to test load_map below, but comment them out
-
+# mit_test = load_map("test_load_map.txt")
+# print(str(mit_test))
 
 #
 # Problem 3: Finding the Shorest Path using Optimized Search Method
@@ -216,5 +234,5 @@ class Ps2Test(unittest.TestCase):
         self._test_impossible_path('10', '32', total_dist=100)
 
 
-if __name__ == "__main__":
-    unittest.main()
+# if __name__ == "__main__":
+#     unittest.main()
