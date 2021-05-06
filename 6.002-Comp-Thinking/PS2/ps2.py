@@ -65,17 +65,18 @@ def load_map(map_filename):
 
 # Problem 2c: Testing load_map
 # Include the lines used to test load_map below, but comment them out
+
 # mit_test = load_map("test_load_map.txt")
-# print(str(mit_test))
+# print(mit_test)
 
 #
-# Problem 3: Finding the Shorest Path using Optimized Search Method
+# Problem 3: Finding the Shortest Path using Optimized Search Method
 #
 # Problem 3a: Objective function
 #
 # What is the objective function for this problem? What are the constraints?
 #
-# Answer:
+# Answer: The objective function is to minimise the total distance travelled while staying below the maximum distance outside.
 #
 
 # Problem 3b: Implement get_best_path
@@ -113,8 +114,42 @@ def get_best_path(digraph, start, end, path, max_dist_outdoors, best_dist,
         If there exists no path that satisfies max_total_dist and
         max_dist_outdoors constraints, then return None.
     """
-    # TODO
-    pass
+    #Depth first search - need to take the first edge and the node it reaches and solve that problem, repeat till get to the end or no more paths
+    #Add the str of the node that you are at to the path
+    path[0].append(start)
+    #Check if you have exceeded the maximum distance outdoors
+    if path[2] > max_dist_outdoors:
+        return None
+    #Check if this is the right node
+    if start == end:
+        #If so return the current path, as well as distance
+        return (path[0], path[1])
+    #loop over all the instances of weightedges associated with the node
+    for edge in digraph.get_edges_for_node(digraph.get_node(start)):
+        #Destintation node
+        dest = edge.get_destination()
+        if dest.get_name() not in path[0]: # Avoid loops
+            #Add distance and outdoor distance to the path
+            temp_path = path 
+            #Outdoor
+            temp_path[1] += edge.get_outdoor_distance()
+            #total
+            temp_path[2] += edge.get_total_distance()
+            #node is the destination of the edge, going through all the edges, shortest path is the same
+            newPath = get_best_path(digraph, dest.get_name(), end, temp_path, max_dist_outdoors, temp_path[1], path[0])
+            #If the total_distance of new path is less than current best path
+            if best_dist == None or best_dist > newPath[1]:
+                path = newPath
+    return path
+            
+mit_test = load_map("test_load_map.txt")
+#Tests for Digraph.get_node that I added
+# a = mit_test.get_node("a")
+# print(a)
+# print(isinstance(a, Node))
+#Test of best_path - depth first search
+best_path = get_best_path(mit_test, "a", "b", [[],0,0], 10, None, None)
+print(best_path)
 
 
 # Problem 3c: Implement directed_dfs
@@ -235,4 +270,4 @@ class Ps2Test(unittest.TestCase):
 
 
 # if __name__ == "__main__":
-#     unittest.main()
+#      unittest.main()

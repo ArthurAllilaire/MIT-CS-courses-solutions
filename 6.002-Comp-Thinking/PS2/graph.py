@@ -38,7 +38,7 @@ class Node(object):
 
 class Edge(object):
     """Represents an edge in the dictionary. Includes a source and
-    a destination."""
+    a destination which are nodes."""
     def __init__(self, src, dest):
         self.src = src
         self.dest = dest
@@ -57,8 +57,8 @@ class WeightedEdge(Edge):
     def __init__(self, src, dest, total_distance, outdoor_distance):
         self.src = src
         self.dest = dest
-        self.tot_dist = total_distance
-        self.out_dist = outdoor_distance
+        self.tot_dist = int(total_distance)
+        self.out_dist = int(outdoor_distance)
 
     def get_total_distance(self):
         return self.tot_dist
@@ -89,6 +89,13 @@ class Digraph(object):
 
     def has_node(self, node):
         return node in self.nodes
+
+    #Added this function
+    def get_node(self, name):
+        """Takes a str for the name of a node in the digraph, returns the node"""
+        for node in self.nodes:
+            if node.get_name() == name:
+                return node
 
     def add_node(self, node):
         """Adds a Node object to the Digraph. Raises a ValueError if it is
