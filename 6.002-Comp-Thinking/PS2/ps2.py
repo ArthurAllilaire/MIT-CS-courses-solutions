@@ -80,8 +80,7 @@ def load_map(map_filename):
 #
 
 # Problem 3b: Implement get_best_path
-def get_best_path(digraph, start, end, path, max_dist_outdoors, best_dist,
-                  best_path):
+def get_best_path(digraph, start, end, path, max_dist_outdoors, best_dist, best_path):
     """
     Finds the shortest path between buildings subject to constraints.
 
@@ -114,42 +113,61 @@ def get_best_path(digraph, start, end, path, max_dist_outdoors, best_dist,
         If there exists no path that satisfies max_total_dist and
         max_dist_outdoors constraints, then return None.
     """
-    #Depth first search - need to take the first edge and the node it reaches and solve that problem, repeat till get to the end or no more paths
-    #Add the str of the node that you are at to the path
-    path[0].append(start)
-    #Check if you have exceeded the maximum distance outdoors
-    if path[2] > max_dist_outdoors:
-        return None
+    #Add the str of the node that you are at to the path - can't use append as adds it to the old list (would mutate arguments passed in) even with list.copy() as it is shallow copying, would need to use list.deepcopy()
+    path[0] = path[0] + [start]
     #Check if this is the right node
     if start == end:
-        #If so return the current path, as well as distance
-        return (path[0], path[1])
-    #loop over all the instances of weightedges associated with the node
-    for edge in digraph.get_edges_for_node(digraph.get_node(start)):
+        #If so return the current path, as well as distance of path
+        print("Returned path: ", path)
+        return (path[0].copy(), path[1])
+    #Check if start node passed in is valid - 
+    # if not  class will raise a ValueError
+    start_node = digraph.get_node(start)
+    #Get all possible paths and loop through each of them - edge is an instance of a WeightedEdge. As passed a string need to get the node before getting associated edges
+    for edge in digraph.get_edges_for_node(start_node):
+        # print("path", path)
+        # print(edge)
         #Destintation node
         dest = edge.get_destination()
-        if dest.get_name() not in path[0]: # Avoid loops
-            #Add distance and outdoor distance to the path
-            temp_path = path 
-            #Outdoor
-            temp_path[1] += edge.get_outdoor_distance()
-            #total
-            temp_path[2] += edge.get_total_distance()
-            #node is the destination of the edge, going through all the edges, shortest path is the same
-            newPath = get_best_path(digraph, dest.get_name(), end, temp_path, max_dist_outdoors, temp_path[1], path[0])
-            #If the total_distance of new path is less than current best path
-            if best_dist == None or best_dist > newPath[1]:
-                path = newPath
-    return path
+        #Check never been to destination to avoid loops
+        if dest.get_name() not in path[0]:
+            #Copy as lists are objects, don't want to change the main path, incase this path is not the right one
+            proposed_path = path.copy()
+            #Add total distance 
+            proposed_path[1] += edge.get_total_distance()
+            # and outdoor distance
+            proposed_path[2] += edge.get_outdoor_distance()
+            #Check to see if problem has been solved and the best path is smaller than the current path
+            if best_dist != None and proposed_path[1] >= best_dist:
+                pass
+            #Check to make sure the proposed path doesn't exceed maximum distance outdoors
+            elif proposed_path[2] > max_dist_outdoors:
+                #move onto next branch
+                pass
+            else: 
+                #Recursively go to the end node
+                end_path = get_best_path(digraph, dest.get_name(), end, proposed_path.copy(), max_dist_outdoors, best_dist, best_path)
+                #Check to make sure a path was returned
+                #Then check to make sure path returned has best_dist so far, first check if best_dist == None
+                if end_path != None and (best_dist == None or end_path[1] < best_dist):
+                    #Change best distance and best path
+                    best_path, best_dist = end_path
+    #Once you have gone through all the possible paths for this node, return the best path and best distance found, only if both not None
+    if best_dist == None or best_path == None:
+        return None
+    return (best_path, best_dist)
+
+
             
 mit_test = load_map("test_load_map.txt")
 #Tests for Digraph.get_node that I added
 # a = mit_test.get_node("a")
 # print(a)
 # print(isinstance(a, Node))
+
 #Test of best_path - depth first search
-best_path = get_best_path(mit_test, "a", "b", [[],0,0], 10, None, None)
-print(best_path)
+# best_path = get_best_path(mit_test, "a", "b", [[],0,0], 10, None, None)
+# print(best_path)
 
 
 # Problem 3c: Implement directed_dfs
@@ -181,8 +199,11 @@ def directed_dfs(digraph, start, end, max_total_dist, max_dist_outdoors):
         If there exists no path that satisfies max_total_dist and
         max_dist_outdoors constraints, then raises a ValueError.
     """
-    # TODO
-    pass
+    best_path = get_best_path(digraph, start, end, [[],0,0], max_dist_outdoors, None, None)
+    # print("BEST PATH", best_path)
+    if best_path == None or best_path[1] > max_total_dist:
+        raise ValueError
+    return best_path[0]
 
 
 # ================================================================
@@ -269,5 +290,5 @@ class Ps2Test(unittest.TestCase):
         self._test_impossible_path('10', '32', total_dist=100)
 
 
-# if __name__ == "__main__":
-#      unittest.main()
+if __name__ == "__main__":
+    unittest.main()

@@ -85,17 +85,19 @@ class Digraph(object):
         return '\n'.join(edge_strs)  # concat edge_strs with "\n"s between them
 
     def get_edges_for_node(self, node):
+        """Returns a list of edges"""
         return self.edges[node]
 
     def has_node(self, node):
         return node in self.nodes
 
-    #Added this function
+    #Added this module
     def get_node(self, name):
         """Takes a str for the name of a node in the digraph, returns the node"""
         for node in self.nodes:
             if node.get_name() == name:
                 return node
+        raise ValueError
 
     def add_node(self, node):
         """Adds a Node object to the Digraph. Raises a ValueError if it is
