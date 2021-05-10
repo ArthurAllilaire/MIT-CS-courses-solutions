@@ -1,0 +1,4 @@
+#Ignores all virtual environments
+env/
+#Ignores all python files called experiment.py
+experiment.py

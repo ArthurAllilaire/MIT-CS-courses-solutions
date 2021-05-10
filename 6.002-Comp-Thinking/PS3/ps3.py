@@ -9,6 +9,7 @@ import random
 
 import ps3_visualize
 import pylab
+import numpy as np
 
 # For python 2.7:
 from ps3_verify_movement27 import test_robot_movement
@@ -81,7 +82,11 @@ class RectangularRoom(object):
         height: an integer > 0
         dirt_amount: an integer >= 0
         """
-        raise NotImplementedError
+        #Using a matrix to simulate tiles
+        self.tiles = np.full((height, width), dirt_amount)
+        self.width = width
+        self.height = height
+        
     
     def clean_tile_at_position(self, pos, capacity):
         """
@@ -96,7 +101,14 @@ class RectangularRoom(object):
         Note: The amount of dirt on each tile should be NON-NEGATIVE.
               If the capacity exceeds the amount of dirt on the tile, mark it as 0.
         """
-        raise NotImplementedError
+        #Access the tile in the matrix
+        y = pos.get_y()
+        x = pos.get_x()
+        tile = self.tiles[y, x]
+        if tile < capacity:
+            self.tiles[y, x] = 0
+        else:
+            self.tiles[y, x] = tile - capacity
 
     def is_tile_cleaned(self, m, n):
         """
@@ -104,21 +116,23 @@ class RectangularRoom(object):
 
         Assumes that (m, n) represents a valid tile inside the room.
 
-        m: an integer
-        n: an integer
+        m: an integer (the x coordinate)
+        n: an integer (the y coordinate)
         
         Returns: True if the tile (m, n) is cleaned, False otherwise
 
         Note: The tile is considered clean only when the amount of dirt on this
               tile is 0.
         """
-        raise NotImplementedError
+        #Returns true if the tile is clean
+        return self.tiles[n,m] == 0
 
     def get_num_cleaned_tiles(self):
         """
         Returns: an integer; the total number of clean tiles in the room
         """
-        raise NotImplementedError
+        #count_nonzero is used to count number of zeros by changing all zero values to 1 (true) and all non-zero values to 0 (false)
+        return np.count_nonzero(self.tiles==0)
         
     def is_position_in_room(self, pos):
         """
@@ -127,8 +141,12 @@ class RectangularRoom(object):
         pos: a Position object.
         Returns: True if pos is in the room, False otherwise.
         """
-        raise NotImplementedError
-        
+        #If coordinates are greater than width or height, or negative return False
+        x = pos.get_x()
+        y = pos.get_y()
+        if x > self.width or y > self.height or x < 0 or y < 0:
+            return False
+        return True         
     def get_dirt_amount(self, m, n):
         """
         Return the amount of dirt on the tile (m, n)
@@ -140,7 +158,7 @@ class RectangularRoom(object):
 
         Returns: an integer
         """
-        raise NotImplementedError
+        return self.tiles[n,m]
         
     def get_num_tiles(self):
         """
@@ -188,20 +206,25 @@ class Robot(object):
         capacity: a positive interger; the amount of dirt cleaned by the robot 
                   in a single time-step
         """
-        raise NotImplementedError
+        self.speed = speed
+        self.capacity = capacity
+        self.room = room
+        #self.pos - is a position object
+        self.pos = room.get_random_position()
+        #Random float between 0 --> 360 to intialize direction.
+        self.direction = random.random() * 360
 
     def get_robot_position(self):
         """
         Returns: a Position object giving the robot's position in the room.
         """
-        raise NotImplementedError
-
+        return self.pos
     def get_robot_direction(self):
         """
         Returns: a float d giving the direction of the robot as an angle in
         degrees, 0.0 <= d < 360.0.
         """
-        raise NotImplementedError
+        return self.direction
 
     def set_robot_position(self, position):
         """
@@ -209,7 +232,7 @@ class Robot(object):
 
         position: a Position object.
         """
-        raise NotImplementedError
+        self.pos = position
 
     def set_robot_direction(self, direction):
         """
@@ -217,8 +240,7 @@ class Robot(object):
 
         direction: float representing an angle in degrees
         """
-        raise NotImplementedError
-
+        self.direction = direction
     def update_position_and_clean(self):
         """
         Simulate the raise passage of a single time-step.
