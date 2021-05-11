@@ -141,10 +141,10 @@ class RectangularRoom(object):
         pos: a Position object.
         Returns: True if pos is in the room, False otherwise.
         """
-        #If coordinates are greater than width or height, or negative return False
+        #If coordinates are greater than or equal to the width or height, or negative return False
         x = math.floor(pos.get_x())
         y = math.floor(pos.get_y())
-        if x > self.width or y > self.height or x < 0 or y < 0:
+        if x >= self.width or y >= self.height or x < 0 or y < 0:
             return False
         return True         
     def get_dirt_amount(self, m, n):
@@ -210,7 +210,7 @@ class Robot(object):
         self.capacity = capacity
         self.room = room
         #self.pos - is a position object
-        self.pos = room.get_random_position()
+        self.pos = self.room.get_random_position()
         #Random float between 0 --> 360 to intialize direction.
         self.direction = random.random() * 360
 
@@ -270,7 +270,7 @@ class EmptyRoom(RectangularRoom):
         Returns: True if pos is in the room, False otherwise.
         """
         #As long as it is in the room then it is valid
-        return RectangularRoom.is_position_in_room(pos)
+        return self.is_position_in_room(pos)
         
     def get_random_position(self):
         """
@@ -339,9 +339,9 @@ class FurnishedRoom(RectangularRoom):
 
         Returns True if pos is furnished and False otherwise
         """
-        x = math.floor(pos.get_x)
-        y = math.floor(pos.get_y)
-        return is_tile_furnished(x,y)
+        x = math.floor(pos.get_x())
+        y = math.floor(pos.get_y())
+        return self.is_tile_furnished(x,y)
         
     def is_position_valid(self, pos):
         """
@@ -349,8 +349,8 @@ class FurnishedRoom(RectangularRoom):
         
         returns: True if pos is in the room and is unfurnished, False otherwise.
         """
-        if RectangularRoom.is_position_in_room(pos):
-            if not is_position_furnished(pos):
+        if self.is_position_in_room(pos):
+            if not self.is_position_furnished(pos):
                 return True
         return False
         
@@ -369,7 +369,7 @@ class FurnishedRoom(RectangularRoom):
             x = random.random() * self.width
             y = random.random() * self.height
             pos = Position(x,y)
-            if is_position_valid(pos):
+            if self.is_position_valid(pos):
                 return pos
 
 
@@ -390,11 +390,11 @@ class StandardRobot(Robot):
         rotate once to a random new direction, and stay stationary) and clean the dirt on the tile
         by its given capacity. 
         """
-        #Using the current position object call the method to find the new position
+        #Using the current position object call the method to find the new position, new_pos is a position object
         new_pos = self.pos.get_new_position(self.direction, self.speed)
         #If new_pos is valid then set_robot position to it - Doesn't work what if it's in an EmptyRoom?
         if self.room.is_position_valid(new_pos):
-            set_robot_position(new_pos)
+            self.set_robot_position(new_pos)
             #Then clean that tile
             self.room.clean_tile_at_position(self.pos, self.capacity)
         else:
@@ -405,7 +405,7 @@ class StandardRobot(Robot):
 
 
 # Uncomment this line to see your implementation of StandardRobot in action!
-test_robot_movement(StandardRobot, EmptyRoom)
+#test_robot_movement(StandardRobot, EmptyRoom)
 #test_robot_movement(StandardRobot, FurnishedRoom)
 
 # === Problem 4
