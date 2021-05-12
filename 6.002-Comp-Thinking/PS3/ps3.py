@@ -476,7 +476,25 @@ def run_simulation(num_robots, speed, capacity, width, height, dirt_amount, min_
     robot_type: class of robot to be instantiated (e.g. StandardRobot or
                 FaultyRobot)
     """
-    raise NotImplementedError
+    mean = 0
+    for _ in range(num_trials):
+        #Initialise an empty room
+        room = EmptyRoom(width, height, dirt_amount)
+        robotArmy = []
+        #Add all robots to the Empty room
+        for _ in range(num_robots):
+            robotArmy.append(robot_type(room, speed, capacity))
+        #Calculate minimum amount of tiles that need to be cleaned
+        min_tiles = math.ceil(room.get_num_tiles() * min_coverage)
+        counter = 0
+        #Run update and clean till min_tiles are clean
+        while min_tiles > room.get_num_cleaned_tiles():
+            for r in robotArmy:
+                r.update_position_and_clean()
+            counter += 1
+        #Once you have cleaned the tiles get num of time-steps needed and add to mean
+        mean += counter
+    return mean / num_trials
 
 
 # print ('avg time steps: ' + str(run_simulation(1, 1.0, 1, 5, 5, 3, 1.0, 50, StandardRobot)))
@@ -491,12 +509,12 @@ def run_simulation(num_robots, speed, capacity, width, height, dirt_amount, min_
 #
 # 1)How does the performance of the two robot types compare when cleaning 80%
 #       of a 20x20 room?
-#
+# Both robots type have an exponential inversely proportional relationship between time taken and number of robots. Faulty robot takes longer, however, the more robots there are the smaller the gap between the two are (they converge).
 #
 # 2) How does the performance of the two robot types compare when two of each
 #       robot cleans 80% of rooms with dimensions 
 #       10x30, 20x15, 25x12, and 50x6?
-#
+#Faulty robot takes significantly longer to clean the room for all aspect ratios. Both robots have a dip in the amount of time between 1-2 aspect ratio. Time then increases proportional to Aspect ratio, but faulty robot has a steeper gradient.
 #
 
 def show_plot_compare_strategies(title, x_label, y_label):
@@ -527,7 +545,7 @@ def show_plot_room_shape(title, x_label, y_label):
     times1 = []
     times2 = []
     for width in [10, 20, 25, 50]:
-        height = 300/width
+        height = int(300/width)
         print ("Plotting cleaning time for a room of width:", width, "by height:", height)
         aspect_ratios.append(float(width) / height)
         times1.append(run_simulation(2, 1.0, 1, width, height, 3, 0.8, 200, StandardRobot))
@@ -541,5 +559,5 @@ def show_plot_room_shape(title, x_label, y_label):
     pylab.show()
 
 
-#show_plot_compare_strategies('Time to clean 80% of a 20x20 room, for various numbers of robots','Number of robots','Time / steps')
-#show_plot_room_shape('Time to clean 80% of a 300-tile room for various room shapes','Aspect Ratio', 'Time / steps')
+# show_plot_compare_strategies('Time to clean 80% of a 20x20 room, for various numbers of robots','Number of robots','Time / steps')
+# show_plot_room_shape('Time to clean 80% of a 300-tile room for various room shapes','Aspect Ratio', 'Time / steps')
