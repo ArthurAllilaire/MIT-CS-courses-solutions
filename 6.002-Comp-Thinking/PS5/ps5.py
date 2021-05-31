@@ -215,11 +215,17 @@ def evaluate_models_on_training(x, y, models):
     """
     for model in models:
         predict_y = pylab.polyval(model,x)
+        #Get type of model
+        if len(model) <= 4:
+            types_of_model = ["linear","quadratic","cubic"]
+            model_type = types_of_model[len(model) - 2]
+        else:
+            model_type = f"{len(model)} degree"
         #make the title
-        title = f"Years against degrees C with {len(model)} degree model \n R2 = {r_squared(y,predict_y)}"
+        title = f"Years against degrees C with {model_type} model \n R2 = {round(r_squared(y,predict_y),5)}"
         #If model is linear get se_over_slope and add to title
         if len(model) == 2:
-            title += f"\nRatio of standard error: {se_over_slope(x,y,predict_y,model)}"
+            title += f"\nStandard error to slope ratio = {round(se_over_slope(x,y,predict_y,model),5)}"
         #Draw two pairs of values
         pylab.figure()
         pylab.plot(x,y, "b-", x, predict_y, "-r")
@@ -244,8 +250,16 @@ def gen_cities_avg(climate, multi_cities, years):
         this array corresponds to the average annual temperature over the given
         cities for a given year.
     """
-    # TODO
-    pass
+    result = []
+    for year in years:
+        total = 0
+        for city in multi_cities:
+            #Get sum of all mean temps for cities
+            total += climate.get_yearly_temp(city, year).mean()
+        #Add the mean for that year to result
+        result.append(total/len(multi_cities))
+    return pylab.array(result)
+
 
 def moving_average(y, window_length):
     """
@@ -330,7 +344,7 @@ if __name__ == '__main__':
     all_temps = Climate("data.csv") 
 
     # Part A.4
-    def new_york_temps(Climate):
+    def new_york_daily_temps(Climate):
         """
         Takes in a instance of a climate object and plots model of a day's temperature's trend over training period.
         """
@@ -350,12 +364,45 @@ if __name__ == '__main__':
         model = generate_models(x, y, [1])
         evaluate_models_on_training(x, y, model)
     #Call new_york function
-    new_york_temps(all_temps)
+    new_york_daily_temps(all_temps)
 
 
-    # Part B
-    # TODO: replace this line with your code
+    # Annual temperatures
+    def new_york_annual_temps(Climate):
+        """
+        Takes in a instance of a climate object and plots model of a city's annual temperature trend over training period.
+        """
+        #Get temperature for Jan 10th in New York
+        city = "NEW YORK"
+        new_york_temps = []
+        #Make training interval into pylab.array() to use as x values
+        #Only convert to array once nothing else is needed to be added (otherwise have to copy all array everytime)
+        x = pylab.array(TRAINING_INTERVAL)
+        for year in x:
+            #For every year get the mean temperature
+            new_york_temps.append(
+            Climate.get_yearly_temp(city, year).mean()
+            )
+        y = pylab.array(new_york_temps)
+        model = generate_models(x, y, [1])
+        evaluate_models_on_training(x, y, model)
+    #Call new_york_annual_temps function
+    new_york_annual_temps(all_temps)
 
+    #Part B - national average temperatures
+    def national_annual_temps(climate):
+        """
+        Takes in a instance of a climate object and plots model of all US city's annual temperature trend over training period.
+        """
+        #Get list of average temp for national cities over training interval period
+        y = gen_cities_avg(climate, CITIES, TRAINING_INTERVAL)
+        #Make training interval into pylab.array() to use as x values
+        #Only convert to array once nothing else is needed to be added (otherwise have to copy all array everytime you add a value)
+        x = pylab.array(TRAINING_INTERVAL)
+        model = generate_models(x, y, [1])
+        evaluate_models_on_training(x, y, model)
+    #Call new_york_annual_temps function
+    national_annual_temps(all_temps)
     # Part C
     # TODO: replace this line with your code
 
