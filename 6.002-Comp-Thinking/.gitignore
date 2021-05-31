@@ -3,3 +3,7 @@ env/
 .venv/
 #Ignores all python files called experiment.py
 experiment.py
+#Ignore all json.settings files
+.vscode/
+#ignore caches
+__pycache__/

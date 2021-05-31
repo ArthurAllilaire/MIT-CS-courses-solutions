@@ -4,7 +4,8 @@
 # Collaborators (discussion):
 # Time:
 
-import pylab
+#Importing this for legacy code
+import matplotlib.pylab as pylab
 import re
 
 # cities in our weather data
@@ -163,8 +164,10 @@ def generate_models(x, y, degs):
         a list of pylab arrays, where each array is a 1-d array of coefficients
         that minimizes the squared error of the fitting polynomial
     """
-    # TODO
-    pass
+    result = []
+    for d in degs:
+        result.append(pylab.polyfit(x,y,d))
+    return result  
 
 
 def r_squared(y, estimated):
@@ -180,8 +183,9 @@ def r_squared(y, estimated):
     Returns:
         a float for the R-squared error term
     """
-    # TODO
-    pass
+    error = (y - estimated)**2
+    variance = (y - y.mean())**2
+    return 1 - error.sum()/variance.sum()
 
 def evaluate_models_on_training(x, y, models):
     """
