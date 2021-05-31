@@ -213,8 +213,21 @@ def evaluate_models_on_training(x, y, models):
     Returns:
         None
     """
-    # TODO
-    pass
+    for model in models:
+        predict_y = pylab.polyval(model,x)
+        #make the title
+        title = f"Years against degrees C with {len(model)} degree model \n R2 = {r_squared(y,predict_y)}"
+        #If model is linear get se_over_slope and add to title
+        if len(model) == 2:
+            title += f"\nRatio of standard error: {se_over_slope(x,y,predict_y,model)}"
+        #Draw two pairs of values
+        pylab.figure()
+        pylab.plot(x,y, "b-", x, predict_y, "-r")
+        pylab.title(title)
+        pylab.xlabel("Years")
+        pylab.ylabel("Temperature in degrees C")
+        pylab.show()
+    
 
 def gen_cities_avg(climate, multi_cities, years):
     """
@@ -314,10 +327,31 @@ def evaluate_models_on_testing(x, y, models):
 
 if __name__ == '__main__':
 
-    pass 
+    all_temps = Climate("data.csv") 
 
     # Part A.4
-    # TODO: replace this line with your code
+    def new_york_temps(Climate):
+        """
+        Takes in a instance of a climate object and plots model of a day's temperature's trend over training period.
+        """
+        #Get temperature for Jan 10th in New York
+        city = "NEW YORK"
+        month = 1
+        day = 10
+        new_york_temps = []
+        #Make training interval into pylab.array() to use as x values
+        #Only convert to array once nothing else is needed to be added (otherwise have to copy all array everytime)
+        x = pylab.array(TRAINING_INTERVAL)
+        for year in x:
+            new_york_temps.append(
+            Climate.get_daily_temp(city, month, day, year)
+            )
+        y = pylab.array(new_york_temps)
+        model = generate_models(x, y, [1])
+        evaluate_models_on_training(x, y, model)
+    #Call new_york function
+    new_york_temps(all_temps)
+
 
     # Part B
     # TODO: replace this line with your code
