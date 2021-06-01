@@ -228,7 +228,7 @@ def evaluate_models_on_training(x, y, models):
             title += f"\nStandard error to slope ratio = {round(se_over_slope(x,y,predict_y,model),5)}"
         #Draw two pairs of values
         pylab.figure()
-        pylab.plot(x,y, "b-", x, predict_y, "-r")
+        pylab.plot(x,y, "bo", x, predict_y, "-r")
         pylab.title(title)
         pylab.xlabel("Years")
         pylab.ylabel("Temperature in degrees C")
@@ -288,7 +288,7 @@ def moving_average(y, window_length):
                 #Get mean from start_index to i
                 pylab.array(y[start_index:i+1]).mean()
             )
-    return result
+    return pylab.array(result)
 
 def rmse(y, estimated):
     """
@@ -303,8 +303,10 @@ def rmse(y, estimated):
     Returns:
         a float for the root mean square error term
     """
-    # TODO
-    pass
+    error = (y - estimated)**2
+    mean_square_error = error.sum()/len(y)
+    return mean_square_error**0.5
+    
 
 def gen_std_devs(climate, multi_cities, years):
     """
@@ -348,8 +350,23 @@ def evaluate_models_on_testing(x, y, models):
     Returns:
         None
     """
-    # TODO
-    pass
+    for model in models:
+        predict_y = pylab.polyval(model,x)
+        #Get type of model
+        if len(model) <= 4:
+            types_of_model = ["linear","quadratic","cubic"]
+            model_type = types_of_model[len(model) - 2]
+        else:
+            model_type = f"{len(model)} degree"
+        #make the title
+        title = f"Years against degrees C with {model_type} model \n RMSE = {round(rmse(y,predict_y),5)}"
+        #Draw two pairs of values
+        pylab.figure()
+        pylab.plot(x,y, "bo", x, predict_y, "-r")
+        pylab.title(title)
+        pylab.xlabel("Years")
+        pylab.ylabel("Temperature in degrees C")
+        pylab.show()
 
 if __name__ == '__main__':
 
@@ -376,7 +393,7 @@ if __name__ == '__main__':
         model = generate_models(x, y, [1])
         evaluate_models_on_training(x, y, model)
     #Call new_york function
-    new_york_daily_temps(all_temps)
+    #new_york_daily_temps(all_temps)
 
 
     # Annual temperatures
@@ -399,7 +416,7 @@ if __name__ == '__main__':
         model = generate_models(x, y, [1])
         evaluate_models_on_training(x, y, model)
     #Call new_york_annual_temps function
-    new_york_annual_temps(all_temps)
+    #new_york_annual_temps(all_temps)
 
     #Part B - national average temperatures
     def national_annual_temps(climate):
@@ -414,12 +431,42 @@ if __name__ == '__main__':
         model = generate_models(x, y, [1])
         evaluate_models_on_training(x, y, model)
     #Call new_york_annual_temps function
-    national_annual_temps(all_temps)
+    #national_annual_temps(all_temps)
     # Part C
-    # TODO: replace this line with your code
+    def national_five_year_temps(climate):
+        """
+        Takes in a instance of a climate object and plots model of all US city's 5 year average of annual temperature trend over training period.
+        """
+        #Get list of average temp for national cities over training interval period
+        city_temps = gen_cities_avg(climate, CITIES, TRAINING_INTERVAL)
+        #Turn city_temps into 5 year moving average
+        y = moving_average(city_temps,5)
+        #Make training interval into pylab.array() to use as x values
+        x = pylab.array(TRAINING_INTERVAL)
+        model = generate_models(x, y, [1])
+        evaluate_models_on_training(x, y, model)
+    #Call new_york_annual_temps function
+    #national_five_year_temps(all_temps)
 
     # Part D.2
-    # TODO: replace this line with your code
+    def five_year_models(climate, degs):
+        """
+        Args:
+            climate: instance of a Climate object
+            degs: list of integers, specifying degrees of model tested to data
+        Returns:
+            Nothing
+        """
+        #Get list of average temp for national cities over training interval period
+        city_temps = gen_cities_avg(climate, CITIES, TRAINING_INTERVAL)
+        #Turn city_temps into 5 year moving average
+        y = moving_average(city_temps,5)
+        #Make training interval into pylab.array() to use as x values
+        x = pylab.array(TRAINING_INTERVAL)
+        models = generate_models(x, y, degs)
+        evaluate_models_on_training(x, y, models)
+    #Call the function
+    five_year_models(all_temps, [1,2,20])
 
     # Part E
     # TODO: replace this line with your code
