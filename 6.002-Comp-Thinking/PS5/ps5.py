@@ -7,6 +7,7 @@
 #Importing this for legacy code
 import matplotlib.pylab as pylab
 import re
+import numpy as np
 
 # cities in our weather data
 CITIES = [
@@ -220,7 +221,7 @@ def evaluate_models_on_training(x, y, models):
             types_of_model = ["linear","quadratic","cubic"]
             model_type = types_of_model[len(model) - 2]
         else:
-            model_type = f"{len(model)} degree"
+            model_type = f"{len(model)-1} degree"
         #make the title
         title = f"Years against degrees C with {model_type} model \n R2 = {round(r_squared(y,predict_y),5)}"
         #If model is linear get se_over_slope and add to title
@@ -323,8 +324,21 @@ def gen_std_devs(climate, multi_cities, years):
         this array corresponds to the standard deviation of the average annual 
         city temperatures for the given cities in a given year.
     """
-    # TODO
-    pass
+    result = []
+    for year in years:
+        city_temps = []
+        national_temp = []
+        for city in multi_cities:
+            #Get a list of arrays, each array is all the daily temps of the year for each city
+            city_temps.append(climate.get_yearly_temp(city, year))
+        #turn the list of arrays into a numpy array
+        city_temps = np.array(city_temps)
+        #go over the 2d array and get an array of temperatures for that day, add the standard deviation to national_temp
+        for day in range(len(city_temps[0])):
+            daily_temps = city_temps[:,day]
+            national_temp.append(pylab.array(daily_temps).mean())
+        result.append(np.std(national_temp))
+    return pylab.array(result)
 
 def evaluate_models_on_testing(x, y, models):
     """
@@ -357,7 +371,7 @@ def evaluate_models_on_testing(x, y, models):
             types_of_model = ["linear","quadratic","cubic"]
             model_type = types_of_model[len(model) - 2]
         else:
-            model_type = f"{len(model)} degree"
+            model_type = f"{len(model)-1} degree"
         #make the title
         title = f"Years against degrees C with {model_type} model \n RMSE = {round(rmse(y,predict_y),5)}"
         #Draw two pairs of values
@@ -393,7 +407,7 @@ if __name__ == '__main__':
         model = generate_models(x, y, [1])
         evaluate_models_on_training(x, y, model)
     #Call new_york function
-    #new_york_daily_temps(all_temps)
+    new_york_daily_temps(all_temps)
 
 
     # Annual temperatures
@@ -416,7 +430,7 @@ if __name__ == '__main__':
         model = generate_models(x, y, [1])
         evaluate_models_on_training(x, y, model)
     #Call new_york_annual_temps function
-    #new_york_annual_temps(all_temps)
+    new_york_annual_temps(all_temps)
 
     #Part B - national average temperatures
     def national_annual_temps(climate):
@@ -431,7 +445,8 @@ if __name__ == '__main__':
         model = generate_models(x, y, [1])
         evaluate_models_on_training(x, y, model)
     #Call new_york_annual_temps function
-    #national_annual_temps(all_temps)
+    national_annual_temps(all_temps)
+
     # Part C
     def national_five_year_temps(climate):
         """
@@ -446,7 +461,7 @@ if __name__ == '__main__':
         model = generate_models(x, y, [1])
         evaluate_models_on_training(x, y, model)
     #Call new_york_annual_temps function
-    #national_five_year_temps(all_temps)
+    national_five_year_temps(all_temps)
 
     # Part D.2
     def five_year_models(climate, degs):
@@ -455,7 +470,7 @@ if __name__ == '__main__':
             climate: instance of a Climate object
             degs: list of integers, specifying degrees of model tested to data
         Returns:
-            Nothing
+            a list of pylab arrays, where each array is a 1-d array of coefficients that minimizes the squared error of the fitting polynomial
         """
         #Get list of average temp for national cities over training interval period
         city_temps = gen_cities_avg(climate, CITIES, TRAINING_INTERVAL)
@@ -465,8 +480,44 @@ if __name__ == '__main__':
         x = pylab.array(TRAINING_INTERVAL)
         models = generate_models(x, y, degs)
         evaluate_models_on_training(x, y, models)
+        return models
     #Call the function
-    five_year_models(all_temps, [1,2,20])
+    training_models = five_year_models(all_temps, [1,2,20])
+
+    def five_year_predictions(climate, models):
+        """
+        Args:
+            climate: instance of a Climate object
+            models: a list of pylab arrays, each array is a 1-d array of coefficients that minimizes the squared error of the fitting polynomial, from training data, to be tested in testing data
+        Returns:
+            Models found
+        """
+        #Get list of average temp for national cities over training interval period
+        city_temps = gen_cities_avg(climate, CITIES, TESTING_INTERVAL)
+        #Turn city_temps into 5 year moving average
+        y = moving_average(city_temps, 5)
+        #Make training interval into pylab.array() to use as x values
+        x = pylab.array(TESTING_INTERVAL)
+        evaluate_models_on_testing(x,y,models)
+    #Call the function
+    five_year_predictions(all_temps, training_models)
 
     # Part E
-    # TODO: replace this line with your code
+    def model_extreme_temp(climate):
+        """
+        Args:
+            climate: instance of a Climate object
+            degs: list of integers, specifying degrees of model tested to data
+        Returns:
+            nothing
+        """
+        #Get list of average temp for national cities over training interval period
+        city_temps = gen_std_devs(climate, CITIES, TRAINING_INTERVAL)
+        #Turn city_temps into 5 year moving average
+        y = moving_average(city_temps,5)
+        #Make training interval into pylab.array() to use as x values
+        x = pylab.array(TRAINING_INTERVAL)
+        models = generate_models(x, y, [1])
+        evaluate_models_on_training(x, y, models)
+    #call the function
+    model_extreme_temp(all_temps)
