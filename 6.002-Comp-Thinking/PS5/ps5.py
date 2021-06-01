@@ -275,8 +275,20 @@ def moving_average(y, window_length):
         an 1-d pylab array with the same length as y storing moving average of
         y-coordinates of the N sample points
     """
-    # TODO
-    pass
+    result = []
+    for i in range(len(y)):
+        start_index = i - window_length + 1
+        if start_index < 0:
+            result.append(
+                #Get mean from start of array till i
+                pylab.array(y[:i+1]).mean()
+            )
+        else:
+            result.append(
+                #Get mean from start_index to i
+                pylab.array(y[start_index:i+1]).mean()
+            )
+    return result
 
 def rmse(y, estimated):
     """
