@@ -1,2 +1,9 @@
-My answers to the assignments of 6.0001 - Intro to CS and 6.0002 - Introduction to computational thinking. I did both after having taken the lecutres.
-Both from the MIT opencourseware website, from 2016.
+# MIT Course solutions and assignments
+
+This is a repository with all the courses I have taken from the MIT OCW. 
+
+These are (in order of how I took them);
+* **6.0001 - Intro to CS:** All assignment answers.
+* **6.0002 - Introduction to computational thinking:** All assignment answers
+* **18.01 Single Variable Calculus:**
+
