@@ -1,0 +1,3 @@
+[submodule "18.01-Single-Var-Calc"]
+	path = 18.01-Single-Var-Calc
+	url = git@github.com:ArthurAllilaire/18.01-Single-Var-Calc.git
